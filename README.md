@@ -1,8 +1,10 @@
-Jeecg-Boot 低代码开发平台
+HEU-donate-server 捐赠服务端
 ===============
 
-当前最新版本： 2.4.6（发布日期：20210813）
-
+## 框架
+JEECG BOOT 低代码开发平台:
+官网: http://www.jeecg.com/
+github: https://github.com/jeecgboot/jeecg-boot
 
 ## 后端技术架构
 - 基础框架：Spring Boot 2.3.5.RELEASE
