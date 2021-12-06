@@ -64,6 +64,11 @@
 			<artifactId>jeecg-boot-module-demo</artifactId>
 			<version>2.4.6</version>
 		</dependency>
+		<dependency>
+			<groupId>org.jeecgframework.boot</groupId>
+			<artifactId>donate-core</artifactId>
+			<version>2.4.6</version>
+		</dependency>
 
 	</dependencies>
 

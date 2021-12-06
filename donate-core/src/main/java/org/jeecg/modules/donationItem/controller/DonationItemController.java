@@ -161,6 +161,20 @@ public class DonationItemController {
 		return Result.OK(donationItem);
 
 	}
+	 @AutoLog(value = "捐赠项目-通过分类id查询")
+	 @ApiOperation(value="捐赠项目-通过分类id查询", notes="捐赠项目-通过id查询")
+	 @GetMapping(value = "/queryByClassId")
+	 public Result<?> queryByClassId(@RequestParam(name="classId",required=true) String classId) {
+
+		 DonationItem donationItem = new DonationItem();
+		 QueryWrapper<DonationItem> queryWrapper = new QueryWrapper<>();
+		 queryWrapper.eq("donation_class",classId);
+
+		 List<DonationItem> itemList = donationItemService.list(queryWrapper);
+
+		 return Result.OK(itemList);
+
+	 }
 	
 	/**
 	 * 通过id查询
