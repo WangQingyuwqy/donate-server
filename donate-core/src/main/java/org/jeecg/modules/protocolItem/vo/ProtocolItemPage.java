@@ -17,7 +17,7 @@ import io.swagger.annotations.ApiModelProperty;
 /**
  * @Description: 协议项目
  * @Author: jeecg-boot
- * @Date:   2021-12-10
+ * @Date:   2021-12-11
  * @Version: V1.0
  */
 @Data
@@ -84,6 +84,25 @@ public class ProtocolItemPage {
     @Dict(dicCode = "donation_category")
 	@ApiModelProperty(value = "项目类别")
     private java.lang.Integer category;
+	/**上传附件*/
+	@Excel(name = "上传附件", width = 15)
+	@ApiModelProperty(value = "上传附件")
+    private java.lang.String description;
+	/**项目到款情况*/
+	@Excel(name = "项目到款情况", width = 15, dicCode = "money_situation")
+    @Dict(dicCode = "money_situation")
+	@ApiModelProperty(value = "项目到款情况")
+    private java.lang.String getSituation;
+	/**项目到账金额*/
+	@Excel(name = "项目到账金额", width = 15)
+	@ApiModelProperty(value = "项目到账金额")
+    private java.lang.Integer getMoney;
+	/**项目到账时间*/
+	@Excel(name = "项目到账时间", width = 20, format = "yyyy-MM-dd HH:mm:ss")
+	@JsonFormat(timezone = "GMT+8",pattern = "yyyy-MM-dd HH:mm:ss")
+    @DateTimeFormat(pattern="yyyy-MM-dd HH:mm:ss")
+	@ApiModelProperty(value = "项目到账时间")
+    private java.util.Date getTime;
 
 	@ExcelCollection(name="协议选项表")
 	@ApiModelProperty(value = "协议选项表")
