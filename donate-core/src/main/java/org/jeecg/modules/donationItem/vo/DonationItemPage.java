@@ -17,7 +17,7 @@ import io.swagger.annotations.ApiModelProperty;
 /**
  * @Description: 捐赠项目
  * @Author: jeecg-boot
- * @Date:   2021-12-05
+ * @Date:   2021-12-15
  * @Version: V1.0
  */
 @Data
@@ -44,6 +44,7 @@ public class DonationItemPage {
 	@ApiModelProperty(value = "更新日期")
     private java.util.Date updateTime;
 	/**所属部门*/
+	@Dict(dictTable = "sys_depart", dicText = "depart_name", dicCode = "org_code")
 	@ApiModelProperty(value = "所属部门")
     private java.lang.String sysOrgCode;
 	/**项目名称*/
@@ -54,6 +55,10 @@ public class DonationItemPage {
 	@Excel(name = "项目图片", width = 15)
 	@ApiModelProperty(value = "项目图片")
     private java.lang.String picture;
+	/**项目简介*/
+	@Excel(name = "项目简介", width = 15)
+	@ApiModelProperty(value = "项目简介")
+    private java.lang.String itemDesc;
 	/**项目详情*/
 	@Excel(name = "项目详情", width = 15)
 	@ApiModelProperty(value = "项目详情")
@@ -76,6 +81,7 @@ public class DonationItemPage {
 	@ApiModelProperty(value = "删除状态")
     private java.lang.Integer delFlag;
 	/**项目状态*/
+	@Dict(dicCode = "donation_status")
 	@Excel(name = "项目状态", width = 15)
 	@ApiModelProperty(value = "项目状态")
     private java.lang.Integer status;
@@ -96,6 +102,9 @@ public class DonationItemPage {
 	@Excel(name = "起赠金额", width = 15)
 	@ApiModelProperty(value = "起赠金额")
     private java.lang.String leastMoney;
+
+	@ApiModelProperty(value = "项目文件")
+	private java.lang.String file;
 
 	@ExcelCollection(name="捐赠选项")
 	@ApiModelProperty(value = "捐赠选项")
