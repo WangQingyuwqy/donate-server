@@ -58,6 +58,8 @@ public interface ISysUserService extends IService<SysUser> {
 	 * @return
 	 */
 	public boolean deleteBatchUsers(String userIds);
+
+	public List<String> getRolesByName(String username);
 	
 	public SysUser getUserByName(String username);
 	

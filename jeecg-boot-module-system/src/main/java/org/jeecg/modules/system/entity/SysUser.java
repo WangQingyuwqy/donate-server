@@ -14,6 +14,7 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import java.io.Serializable;
+import java.util.List;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -182,4 +183,6 @@ public class SysUser implements Serializable {
 
     /**设备id uniapp推送用*/
     private String clientId;
+
+    private List<String> roleId;
 }

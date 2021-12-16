@@ -16,6 +16,17 @@
             <groupId>org.jeecgframework.boot</groupId>
             <artifactId>jeecg-boot-base-core</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.jeecgframework.boot</groupId>
+            <artifactId>jeecg-system-local-api</artifactId>
+        </dependency>
+
+        <!--mybatis plus 多表查询加强工具-->
+        <dependency>
+            <groupId>com.github.yulichang</groupId>
+            <artifactId>mybatis-plus-join</artifactId>
+            <version>1.1.8</version>
+        </dependency>
         <!--引入微服务启动依赖 starter
       <dependency>
           <groupId>org.jeecgframework.boot</groupId>
