@@ -47,6 +47,7 @@ public class ProtocolItem implements Serializable {
     @ApiModelProperty(value = "更新日期")
     private java.util.Date updateTime;
 	/**所属部门*/
+	@Dict(dictTable = "sys_depart", dicText = "depart_name", dicCode = "org_code")
     @ApiModelProperty(value = "所属部门")
     private java.lang.String sysOrgCode;
 	/**项目名称*/
@@ -57,6 +58,10 @@ public class ProtocolItem implements Serializable {
 	@Excel(name = "项目图片", width = 15)
     @ApiModelProperty(value = "项目图片")
     private java.lang.String picture;
+    /**项目简介*/
+    @Excel(name = "项目简介", width = 15)
+    @ApiModelProperty(value = "项目简介")
+    private java.lang.String itemDesc;
 	/**项目详情*/
 	@Excel(name = "项目详情", width = 15)
     @ApiModelProperty(value = "项目详情")
@@ -79,6 +84,7 @@ public class ProtocolItem implements Serializable {
     @ApiModelProperty(value = "删除状态")
     private java.lang.Integer delFlag;
 	/**项目状态*/
+    @Dict(dicCode = "protocol_status")
 	@Excel(name = "项目状态", width = 15)
     @ApiModelProperty(value = "项目状态")
     private java.lang.Integer status;
@@ -88,7 +94,7 @@ public class ProtocolItem implements Serializable {
     @ApiModelProperty(value = "项目类别")
     private java.lang.Integer category;
 	/**上传附件*/
-	@Excel(name = "上传附件", width = 15)
+	/*@Excel(name = "上传附件", width = 15)*/
     @ApiModelProperty(value = "上传附件")
     private java.lang.String description;
 	/**项目到款情况*/

@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.jeecg.modules.donationItem.entity.DonationItem;
 import org.jeecgframework.poi.excel.ExcelImportUtil;
 import org.jeecgframework.poi.excel.def.NormalExcelConstants;
 import org.jeecgframework.poi.excel.entity.ExportParams;
@@ -57,7 +58,7 @@ public class ProtocolItemController {
 	private IProtocolItemService protocolItemService;
 	@Autowired
 	private IProtocolOptionService protocolOptionService;
-	
+
 	/**
 	 * 分页列表查询
 	 *
@@ -79,7 +80,7 @@ public class ProtocolItemController {
 		IPage<ProtocolItem> pageList = protocolItemService.page(page, queryWrapper);
 		return Result.OK(pageList);
 	}
-	
+
 	/**
 	 *   添加
 	 *
@@ -95,7 +96,7 @@ public class ProtocolItemController {
 		protocolItemService.saveMain(protocolItem, protocolItemPage.getProtocolOptionList());
 		return Result.OK("添加成功！");
 	}
-	
+
 	/**
 	 *  编辑
 	 *
@@ -115,7 +116,7 @@ public class ProtocolItemController {
 		protocolItemService.updateMain(protocolItem, protocolItemPage.getProtocolOptionList());
 		return Result.OK("编辑成功!");
 	}
-	
+
 	/**
 	 *   通过id删除
 	 *
@@ -129,7 +130,7 @@ public class ProtocolItemController {
 		protocolItemService.delMain(id);
 		return Result.OK("删除成功!");
 	}
-	
+
 	/**
 	 *  批量删除
 	 *
@@ -143,7 +144,7 @@ public class ProtocolItemController {
 		this.protocolItemService.delBatchMain(Arrays.asList(ids.split(",")));
 		return Result.OK("批量删除成功！");
 	}
-	
+
 	/**
 	 * 通过id查询
 	 *
@@ -161,7 +162,22 @@ public class ProtocolItemController {
 		return Result.OK(protocolItem);
 
 	}
-	
+
+	 @AutoLog(value = "协议项目-通过分类id查询")
+	 @ApiOperation(value="协议项目-通过分类id查询", notes="协议项目-通过id查询")
+	 @GetMapping(value = "/queryByClassId")
+	 public Result<?> queryByClassId(@RequestParam(name="classId",required=true) String classId) {
+
+		 ProtocolItem protocolItem = new ProtocolItem();
+		 QueryWrapper<ProtocolItem> queryWrapper = new QueryWrapper<>();
+		 queryWrapper.eq("protocol_class",classId);
+
+		 List<ProtocolItem> itemList = protocolItemService.list(queryWrapper);
+
+		 return Result.OK(itemList);
+
+	 }
+
 	/**
 	 * 通过id查询
 	 *
