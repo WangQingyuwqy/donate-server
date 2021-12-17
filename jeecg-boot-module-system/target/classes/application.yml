@@ -1,5 +1,0 @@
-spring:
-  application:
-    name: donate-system
-  profiles:
-    active: dev
