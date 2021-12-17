@@ -25,6 +25,8 @@ public interface ISysBaseAPI extends CommonAPI {
      */
     void sendSysAnnouncement(MessageDTO message);
 
+    void sendSysAnnouncementById(MessageDTO message);
+
     /**
      * 2发送消息 附带业务参数
      * @param message 使用构造器赋值参数
@@ -326,5 +328,24 @@ public interface ISysBaseAPI extends CommonAPI {
      * @return
      */
     List<DictModel> loadDictItemByKeyword(String dictCode, String keyword, Integer pageSize);
+
+
+    String getParentIdByUserId(String id);
+
+    String getParentDepIdByDepartId(String departId);
+
+    String getDepartIdByUserId(String userId);
+
+    public List<String> getSubDepIdsByDepId(String userId);
+//
+//    public List<String> getDepAdminByDepId(String depId);
+
+    /**
+     * 2021-12-12 @Author CabbSir
+     * 根据roleId 查询所有管理员id list
+     * @param roleId
+     * @return
+     */
+//    List<String> getSysUserListByRole(String roleId);
 
 }

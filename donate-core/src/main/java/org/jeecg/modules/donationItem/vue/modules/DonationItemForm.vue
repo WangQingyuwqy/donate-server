@@ -15,6 +15,11 @@
             </a-form-model-item>
           </a-col>
           <a-col :span="24" >
+            <a-form-model-item label="项目简介" :labelCol="labelCol" :wrapperCol="wrapperCol" prop="itemDesc">
+              <a-input v-model="model.itemDesc" placeholder="请输入项目简介" ></a-input>
+            </a-form-model-item>
+          </a-col>
+          <a-col :span="24" >
             <a-form-model-item label="项目详情" :labelCol="labelCol" :wrapperCol="wrapperCol" prop="detail">
               <j-editor v-model="model.detail" />
             </a-form-model-item>
@@ -35,11 +40,6 @@
             </a-form-model-item>
           </a-col>
           <a-col :span="24" >
-            <a-form-model-item label="项目状态" :labelCol="labelCol" :wrapperCol="wrapperCol" prop="status">
-              <j-switch v-model="model.status"  ></j-switch>
-            </a-form-model-item>
-          </a-col>
-          <a-col :span="24" >
             <a-form-model-item label="目标金额" :labelCol="labelCol" :wrapperCol="wrapperCol" prop="targetMoney">
               <a-input v-model="model.targetMoney" placeholder="请输入目标金额" ></a-input>
             </a-form-model-item>
@@ -47,11 +47,6 @@
           <a-col :span="24" >
             <a-form-model-item label="已筹金额" :labelCol="labelCol" :wrapperCol="wrapperCol" prop="raisedMoney">
               <a-input v-model="model.raisedMoney" placeholder="请输入已筹金额" ></a-input>
-            </a-form-model-item>
-          </a-col>
-          <a-col :span="24" >
-            <a-form-model-item label="项目类别" :labelCol="labelCol" :wrapperCol="wrapperCol" prop="category">
-              <j-dict-select-tag type="list" v-model="model.category" dictCode="donation_category" placeholder="请选择项目类别" />
             </a-form-model-item>
           </a-col>
           <a-col :span="24" >

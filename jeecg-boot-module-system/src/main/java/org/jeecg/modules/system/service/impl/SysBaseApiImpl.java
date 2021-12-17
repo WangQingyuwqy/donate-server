@@ -10,6 +10,8 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.google.common.base.Joiner;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
+import org.apache.ibatis.session.ExecutorType;
+import org.apache.ibatis.session.SqlSession;
 import org.apache.shiro.SecurityUtils;
 import org.jeecg.common.api.dto.OnlineAuthDTO;
 import org.jeecg.common.api.dto.message.*;
@@ -31,8 +33,10 @@ import org.jeecg.modules.message.service.ISysMessageTemplateService;
 import org.jeecg.modules.message.websocket.WebSocket;
 import org.jeecg.modules.system.entity.*;
 import org.jeecg.modules.system.mapper.*;
+import org.jeecg.modules.system.model.DepartIdModel;
 import org.jeecg.modules.system.service.*;
 import org.jeecg.modules.system.util.SecurityUtil;
+import org.mybatis.spring.SqlSessionTemplate;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
@@ -50,7 +54,7 @@ import java.util.*;
 /**
  * @Description: 底层共通业务API，提供其他独立模块调用
  * @Author: scott
- * @Date:2019-4-20 
+ * @Date:2019-4-20
  * @Version:V1.0
  */
 @Slf4j
@@ -75,13 +79,15 @@ public class SysBaseApiImpl implements ISysBaseAPI {
 	@Resource
 	private SysAnnouncementSendMapper sysAnnouncementSendMapper;
 	@Resource
-    private WebSocket webSocket;
+	private WebSocket webSocket;
 	@Resource
 	private SysRoleMapper roleMapper;
 	@Resource
 	private SysDepartMapper departMapper;
 	@Resource
 	private SysCategoryMapper categoryMapper;
+	@Resource
+	private SysDepartRoleMapper sysDepartRoleMapper;
 
 	@Autowired
 	private ISysDataSourceService dataSourceService;
@@ -99,6 +105,11 @@ public class SysBaseApiImpl implements ISysBaseAPI {
 
 	@Autowired
 	ISysCategoryService sysCategoryService;
+
+	@Autowired
+	SqlSessionTemplate sqlSessionTemplate;
+
+
 
 	@Override
 	@Cacheable(cacheNames=CacheConstant.SYS_USERS_CACHE, key="#username")
@@ -303,6 +314,22 @@ public class SysBaseApiImpl implements ISysBaseAPI {
 	@Override
 	public void sendSysAnnouncement(MessageDTO message) {
 		this.sendSysAnnouncement(message.getFromUser(),
+				message.getToUser(),
+				message.getTitle(),
+				message.getContent(),
+				message.getCategory());
+		try {
+			// 同步发送第三方APP消息
+			wechatEnterpriseService.sendMessage(message, true);
+			dingtalkService.sendMessage(message, true);
+		} catch (Exception e) {
+			log.error("同步发送第三方APP消息失败！", e);
+		}
+	}
+
+	@Override
+	public void sendSysAnnouncementById(MessageDTO message) {
+		this.sendSysAnnouncementById(message.getFromUser(),
 				message.getToUser(),
 				message.getTitle(),
 				message.getContent(),
@@ -637,26 +664,26 @@ public class SysBaseApiImpl implements ISysBaseAPI {
 		return list;
 	}
 
-    @Override
-    public List<ComboModel> queryAllRole(String[] roleIds) {
-        List<ComboModel> list = new ArrayList<ComboModel>();
-        List<SysRole> roleList = roleMapper.selectList(new QueryWrapper<SysRole>());
-        for(SysRole role : roleList){
-            ComboModel model = new ComboModel();
-            model.setTitle(role.getRoleName());
-            model.setId(role.getId());
-            model.setRoleCode(role.getRoleCode());
-            if(oConvertUtils.isNotEmpty(roleIds)) {
-                for (int i = 0; i < roleIds.length; i++) {
-                    if (roleIds[i].equals(role.getId())) {
-                        model.setChecked(true);
-                    }
-                }
-            }
-            list.add(model);
-        }
-        return list;
-    }
+	@Override
+	public List<ComboModel> queryAllRole(String[] roleIds) {
+		List<ComboModel> list = new ArrayList<ComboModel>();
+		List<SysRole> roleList = roleMapper.selectList(new QueryWrapper<SysRole>());
+		for(SysRole role : roleList){
+			ComboModel model = new ComboModel();
+			model.setTitle(role.getRoleName());
+			model.setId(role.getId());
+			model.setRoleCode(role.getRoleCode());
+			if(oConvertUtils.isNotEmpty(roleIds)) {
+				for (int i = 0; i < roleIds.length; i++) {
+					if (roleIds[i].equals(role.getId())) {
+						model.setChecked(true);
+					}
+				}
+			}
+			list.add(model);
+		}
+		return list;
+	}
 
 	@Override
 	public List<String> getRoleIdsByUsername(String username) {
@@ -948,6 +975,8 @@ public class SysBaseApiImpl implements ISysBaseAPI {
 		announcement.setSendTime(new Date());
 		announcement.setMsgCategory(setMsgCategory);
 		announcement.setDelFlag(String.valueOf(CommonConstant.DEL_FLAG_0));
+//		announcement.setSendCount(toUser.split(",").length);
+
 		sysAnnouncementMapper.insert(announcement);
 		// 2.插入用户通告阅读标记表记录
 		String userId = toUser;
@@ -963,6 +992,7 @@ public class SysBaseApiImpl implements ISysBaseAPI {
 				announcementSend.setAnntId(anntId);
 				announcementSend.setUserId(sysUser.getId());
 				announcementSend.setReadFlag(CommonConstant.NO_READ_FLAG);
+//				announcementSend.setIsDelay(0);
 				sysAnnouncementSendMapper.insert(announcementSend);
 				JSONObject obj = new JSONObject();
 				obj.put(WebsocketConst.MSG_CMD, WebsocketConst.CMD_USER);
@@ -972,6 +1002,57 @@ public class SysBaseApiImpl implements ISysBaseAPI {
 				webSocket.sendMessage(sysUser.getId(), obj.toJSONString());
 			}
 		}
+
+	}
+
+	/**
+	 * 通过用户id发消息
+	 * @param fromUser
+	 * @param toUser
+	 * @param title
+	 * @param msgContent
+	 * @param setMsgCategory
+	 */
+	private void sendSysAnnouncementById(String fromUser, String toUser, String title, String msgContent,
+										 String setMsgCategory) {
+		SysAnnouncement announcement = new SysAnnouncement();
+		announcement.setTitile(title);
+		announcement.setMsgContent(msgContent);
+		announcement.setUserIds(toUser);
+		announcement.setSender(fromUser);
+		announcement.setPriority(CommonConstant.PRIORITY_M);
+		announcement.setMsgType(CommonConstant.MSG_TYPE_UESR);
+		announcement.setSendStatus(CommonConstant.HAS_SEND);
+		announcement.setSendTime(new Date());
+		announcement.setMsgCategory(setMsgCategory);
+		announcement.setDelFlag(String.valueOf(CommonConstant.DEL_FLAG_0));
+//		announcement.setSendCount(toUser.split(",").length);
+		sysAnnouncementMapper.insert(announcement);
+		// 2.插入用户通告阅读标记表记录
+		String userId = toUser;
+		String[] userIds = userId.split(",");
+		String anntId = announcement.getId();
+		List<SysAnnouncementSend> sysAnnouncementSendList = new ArrayList<>();
+
+		for(int i=0;i<userIds.length;i++) {
+			SysAnnouncementSend announcementSend = new SysAnnouncementSend();
+			announcementSend.setAnntId(anntId);
+			announcementSend.setUserId(userIds[i]);
+			announcementSend.setReadFlag(CommonConstant.NO_READ_FLAG);
+//			announcementSend.setIsDelay(0);
+			sysAnnouncementSendList.add(announcementSend);
+		}
+		SqlSession sqlSession = sqlSessionTemplate.getSqlSessionFactory().openSession(ExecutorType.BATCH.BATCH, false);
+		sysAnnouncementSendMapper = sqlSession.getMapper(SysAnnouncementSendMapper.class);
+		sysAnnouncementSendList.forEach(item -> {
+			sysAnnouncementSendMapper.insert(item);
+		});
+		sqlSession.commit();
+		JSONObject obj = new JSONObject();
+		obj.put(WebsocketConst.MSG_CMD, WebsocketConst.CMD_USER);
+		obj.put(WebsocketConst.MSG_ID, announcement.getId());
+		obj.put(WebsocketConst.MSG_TXT, announcement.getTitile());
+		webSocket.sendMessage(userIds, obj.toJSONString());
 
 	}
 
@@ -1034,8 +1115,8 @@ public class SysBaseApiImpl implements ISysBaseAPI {
 	 */
 	@Override
 	public void sendEmailMsg(String email, String title, String content) {
-			EmailSendMsgHandle emailHandle=new EmailSendMsgHandle();
-			emailHandle.SendMsg(email, title, content);
+		EmailSendMsgHandle emailHandle=new EmailSendMsgHandle();
+		emailHandle.SendMsg(email, title, content);
 	}
 
 	/**
@@ -1051,8 +1132,8 @@ public class SysBaseApiImpl implements ISysBaseAPI {
 			//2.获取公司下级部门
 			List<SysDepart> departs=sysDepartService.queryDeptByPid(comp.getId());
 			//3.获取部门下的人员信息
-			 List<Map> list=new ArrayList();
-			 //4.处理部门和下级用户数据
+			List<Map> list=new ArrayList();
+			//4.处理部门和下级用户数据
 			for (SysDepart dept:departs) {
 				Map map=new HashMap();
 				//部门名称
@@ -1152,4 +1233,40 @@ public class SysBaseApiImpl implements ISysBaseAPI {
 		return sysDictService.queryTableDictTextByKeys(table, text, code, Arrays.asList(keys.split(",")));
 	}
 
+
+	@Override
+	public String getParentIdByUserId(String id) {
+		String departId = sysUserDepartService.queryDepartIdsOfUser(id).get(0).getKey();
+//		QueryWrapper<SysDepart> queryWrapper = new QueryWrapper<>();
+		SysDepart sysDepart = sysDepartService.getById(departId);
+		return sysDepart.getParentId();
+	}
+
+
+	@Override
+	public String getParentDepIdByDepartId(String departId){
+		return sysDepartService.getById(departId).getParentId();
+	}
+
+	@Override
+	public String getDepartIdByUserId(String userId) {
+		QueryWrapper<SysUserDepart> queryWrapper = new QueryWrapper<>();
+		queryWrapper.eq("user_id",userId);
+		return sysUserDepartService.getOne(queryWrapper).getDepId();
+	}
+
+	@Override
+	public List<String> getSubDepIdsByDepId(String userId) {
+		return sysDepartService.getSubDepIdsByDepId(userId);
+	}
+
+//	@Override
+//	public List<String> getDepAdminByDepId(String depId) {
+//		return sysDepartRoleMapper.getDepAdminByDepId(depId);
+//	}
+
+//	@Override
+//	public List<String> getSysUserListByRole(String roleId) {
+//		return sysUserRoleMapper.getSysUserListByRole(roleId);
+//	}
 }

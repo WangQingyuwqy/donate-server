@@ -12,6 +12,9 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.jeecg.common.system.api.ISysBaseAPI;
+import org.jeecg.modules.tasks.smartVerifyTask.service.ISmartVerifyTaskService;
+import org.jeecg.modules.tasks.smartVerifyTask.service.SmartVerify;
 import org.jeecgframework.poi.excel.ExcelImportUtil;
 import org.jeecgframework.poi.excel.def.NormalExcelConstants;
 import org.jeecgframework.poi.excel.entity.ExportParams;
@@ -45,7 +48,7 @@ import org.jeecg.common.aspect.annotation.AutoLog;
  /**
  * @Description: 捐赠项目
  * @Author: jeecg-boot
- * @Date:   2021-12-05
+ * @Date:   2021-12-15
  * @Version: V1.0
  */
 @Api(tags="捐赠项目")
@@ -57,6 +60,12 @@ public class DonationItemController {
 	private IDonationItemService donationItemService;
 	@Autowired
 	private IDonationOptionService donationOptionService;
+	@Autowired
+	private ISysBaseAPI sysBaseAPI;
+	@Autowired
+	private ISmartVerifyTaskService smartVerifyTaskService;
+	@Autowired
+	private SmartVerify smartVerify;
 	
 	/**
 	 * 分页列表查询
@@ -90,9 +99,41 @@ public class DonationItemController {
 	@ApiOperation(value="捐赠项目-添加", notes="捐赠项目-添加")
 	@PostMapping(value = "/add")
 	public Result<?> add(@RequestBody DonationItemPage donationItemPage) {
+		LoginUser sysUser = (LoginUser) SecurityUtils.getSubject().getPrincipal();
+		String orgCode = sysUser.getOrgCode();
+		log.info(orgCode);
+		if("".equals(orgCode)) {
+			return Result.error("本用户没有操作权限");
+		}
+
+
+
+		String id = sysBaseAPI.getDepartIdsByOrgCode(orgCode);
+//		log.info(id);
+//		donationItemPage.setDepartId(id);
 		DonationItem donationItem = new DonationItem();
 		BeanUtils.copyProperties(donationItemPage, donationItem);
+//		log.info(smartSupervision.getId());
+
+//		Boolean isVerify = smartVerifyTypeService.getIsVerifyStatusByType(verifyType);
 		donationItemService.saveMain(donationItem, donationItemPage.getDonationOptionList());
+		String recordId = donationItem.getId();
+		log.info("recordId is"+recordId);
+		List<String> roleName = sysBaseAPI.getRolesByUsername(sysUser.getUsername());
+		log.info("这里"+String.valueOf(roleName));
+		if(roleName.contains("schoolmate_admin")){
+			log.info("这里hahaha");
+			donationItem.setStatus(1);
+			donationItem.setCategory(1);
+		}
+		else{
+			smartVerify.addVerifyRecord(recordId,"捐赠");
+			donationItem.setStatus(smartVerify.getFlowStatusById(recordId));
+			donationItem.setCategory(2);
+		}
+
+		donationItemService.updateById(donationItem);
+
 		return Result.OK("添加成功！");
 	}
 	
@@ -175,7 +216,7 @@ public class DonationItemController {
 		 return Result.OK(itemList);
 
 	 }
-	
+
 	/**
 	 * 通过id查询
 	 *

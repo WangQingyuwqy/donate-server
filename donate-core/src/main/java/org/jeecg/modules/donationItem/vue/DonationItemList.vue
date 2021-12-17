@@ -4,6 +4,33 @@
     <div class="table-page-search-wrapper">
       <a-form layout="inline" @keyup.enter.native="searchQuery">
         <a-row :gutter="24">
+          <a-col :xl="6" :lg="7" :md="8" :sm="24">
+            <a-form-item label="捐赠项目分类">
+              <j-dict-select-tag placeholder="请选择捐赠项目分类" v-model="queryParam.donationClass" dictCode="donation_class,name,id"/>
+            </a-form-item>
+          </a-col>
+          <a-col :xl="6" :lg="7" :md="8" :sm="24">
+            <a-form-item label="项目状态">
+              <a-input placeholder="请输入项目状态" v-model="queryParam.status"></a-input>
+            </a-form-item>
+          </a-col>
+          <template v-if="toggleSearchStatus">
+            <a-col :xl="6" :lg="7" :md="8" :sm="24">
+              <a-form-item label="项目类别">
+                <j-dict-select-tag placeholder="请选择项目类别" v-model="queryParam.category" dictCode="donation_category"/>
+              </a-form-item>
+            </a-col>
+          </template>
+          <a-col :xl="6" :lg="7" :md="8" :sm="24">
+            <span style="float: left;overflow: hidden;" class="table-page-search-submitButtons">
+              <a-button type="primary" @click="searchQuery" icon="search">查询</a-button>
+              <a-button type="primary" @click="searchReset" icon="reload" style="margin-left: 8px">重置</a-button>
+              <a @click="handleToggleSearch" style="margin-left: 8px">
+                {{ toggleSearchStatus ? '收起' : '展开' }}
+                <a-icon :type="toggleSearchStatus ? 'up' : 'down'"/>
+              </a>
+            </span>
+          </a-col>
         </a-row>
       </a-form>
     </div>
@@ -132,6 +159,11 @@
             dataIndex: 'createTime'
           },
           {
+            title:'所属部门',
+            align:"center",
+            dataIndex: 'sysOrgCode'
+          },
+          {
             title:'项目名称',
             align:"center",
             dataIndex: 'name'
@@ -150,8 +182,7 @@
           {
             title:'项目状态',
             align:"center",
-            dataIndex: 'status',
-            customRender: (text) => (!text ? "" : (text == "Y" ? "是" : "否"))
+            dataIndex: 'status'
           },
           {
             title:'目标金额',
@@ -209,13 +240,15 @@
         let fieldList=[];
          fieldList.push({type:'string',value:'createBy',text:'创建人',dictCode:''})
          fieldList.push({type:'datetime',value:'createTime',text:'创建日期'})
+         fieldList.push({type:'string',value:'sysOrgCode',text:'所属部门',dictCode:''})
          fieldList.push({type:'string',value:'name',text:'项目名称',dictCode:''})
          fieldList.push({type:'Text',value:'picture',text:'项目图片',dictCode:''})
+         fieldList.push({type:'string',value:'itemDesc',text:'项目简介',dictCode:''})
          fieldList.push({type:'Text',value:'detail',text:'项目详情',dictCode:''})
          fieldList.push({type:'Text',value:'story',text:'捐赠故事',dictCode:''})
          fieldList.push({type:'Text',value:'question',text:'常见问题',dictCode:''})
          fieldList.push({type:'string',value:'donationClass',text:'捐赠项目分类',dictCode:'donation_class,name,id'})
-         fieldList.push({type:'switch',value:'status',text:'项目状态'})
+         fieldList.push({type:'int',value:'status',text:'项目状态',dictCode:'donation_status'})
          fieldList.push({type:'string',value:'targetMoney',text:'目标金额',dictCode:''})
          fieldList.push({type:'string',value:'raisedMoney',text:'已筹金额',dictCode:''})
          fieldList.push({type:'int',value:'category',text:'项目类别',dictCode:'donation_category'})
