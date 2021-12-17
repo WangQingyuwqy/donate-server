@@ -81,7 +81,7 @@ public class UserDonationItemController {
     @GetMapping(value = "/list")
     public Result<?> queryPageList(DonationItem donationItem,
                                    @RequestParam(name="pageNo", defaultValue="1") Integer pageNo,
-                                   @RequestParam(name="pageSize", defaultValue="10") Integer pageSize,
+                                   @RequestParam(name="pageSize", defaultValue="12") Integer pageSize,
                                    HttpServletRequest req) {
         QueryWrapper<DonationItem> queryWrapper = QueryGenerator.initQueryWrapper(donationItem, req.getParameterMap());
         Page<DonationItem> page = new Page<DonationItem>(pageNo, pageSize);
