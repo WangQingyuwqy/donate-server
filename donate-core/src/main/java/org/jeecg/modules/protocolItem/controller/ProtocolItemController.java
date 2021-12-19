@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.jeecg.common.system.api.ISysBaseAPI;
 import org.jeecg.modules.donationItem.entity.DonationItem;
 import org.jeecgframework.poi.excel.ExcelImportUtil;
 import org.jeecgframework.poi.excel.def.NormalExcelConstants;
@@ -58,6 +59,8 @@ public class ProtocolItemController {
 	private IProtocolItemService protocolItemService;
 	@Autowired
 	private IProtocolOptionService protocolOptionService;
+	@Autowired
+	private ISysBaseAPI sysBaseAPI;
 
 	/**
 	 * 分页列表查询
@@ -91,9 +94,35 @@ public class ProtocolItemController {
 	@ApiOperation(value="协议项目-添加", notes="协议项目-添加")
 	@PostMapping(value = "/add")
 	public Result<?> add(@RequestBody ProtocolItemPage protocolItemPage) {
-		ProtocolItem protocolItem = new ProtocolItem();
+		LoginUser sysUser = (LoginUser) SecurityUtils.getSubject().getPrincipal();
+		String orgCode = sysUser.getOrgCode();
+		log.info(orgCode);
+		if("".equals(orgCode)) {
+			return Result.error("本用户没有操作权限");
+		}
+
+		String id = sysBaseAPI.getDepartIdsByOrgCode(orgCode);
+		ProtocolItem protocolItem=new ProtocolItem();
+
 		BeanUtils.copyProperties(protocolItemPage, protocolItem);
+
 		protocolItemService.saveMain(protocolItem, protocolItemPage.getProtocolOptionList());
+		String recordId = protocolItem.getId();
+		log.info("recordId is"+recordId);
+		List<String> roleName = sysBaseAPI.getRolesByUsername(sysUser.getUsername());
+		log.info("这里"+String.valueOf(roleName));
+		if(roleName.contains("schoolmate_admin")){
+			log.info("这里hahaha");
+			protocolItem.setStatus(1);
+			protocolItem.setCategory(1);
+		}
+		else{
+			protocolItem.setStatus(1);
+			protocolItem.setCategory(2);
+		}
+
+		protocolItemService.updateById(protocolItem);
+
 		return Result.OK("添加成功！");
 	}
 

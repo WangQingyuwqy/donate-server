@@ -64,7 +64,7 @@ public class UserProtocolClassController extends JeecgController<ProtocolClass, 
     @GetMapping(value = "/list")
     public Result<?> queryPageList(ProtocolClass protocolClass,
                                    @RequestParam(name="pageNo", defaultValue="1") Integer pageNo,
-                                   @RequestParam(name="pageSize", defaultValue="10") Integer pageSize,
+                                   @RequestParam(name="pageSize", defaultValue="12") Integer pageSize,
                                    HttpServletRequest req) {
         QueryWrapper<ProtocolClass> queryWrapper = QueryGenerator.initQueryWrapper(protocolClass, req.getParameterMap());
         Page<ProtocolClass> page = new Page<ProtocolClass>(pageNo, pageSize);

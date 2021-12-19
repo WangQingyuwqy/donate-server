@@ -54,6 +54,10 @@ public class ProtocolItemPage {
 	@Excel(name = "项目图片", width = 15)
 	@ApiModelProperty(value = "项目图片")
     private java.lang.String picture;
+	/**项目简介*/
+	@Excel(name = "项目简介", width = 15)
+	@ApiModelProperty(value = "项目简介")
+	private java.lang.String itemDesc;
 	/**项目详情*/
 	@Excel(name = "项目详情", width = 15)
 	@ApiModelProperty(value = "项目详情")

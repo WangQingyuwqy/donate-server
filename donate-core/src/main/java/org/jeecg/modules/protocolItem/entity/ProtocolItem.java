@@ -5,6 +5,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.Date;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -80,9 +81,9 @@ public class ProtocolItem implements Serializable {
     @ApiModelProperty(value = "协议项目分类")
     private java.lang.String protocolClass;
 	/**删除状态*/
-	@Excel(name = "删除状态", width = 15)
-    @ApiModelProperty(value = "删除状态")
-    private java.lang.Integer delFlag;
+	@Excel(name = "删除状态", width = 15,dicCode = "del_flag")
+    @TableLogic
+    private Integer delFlag;
 	/**项目状态*/
     @Dict(dicCode = "protocol_status")
 	@Excel(name = "项目状态", width = 15)
