@@ -70,6 +70,10 @@ public class ProtocolItemPage {
 	@Excel(name = "常见问题", width = 15)
 	@ApiModelProperty(value = "常见问题")
     private java.lang.String question;
+	/**支出情况*/
+	@Excel(name = "支出情况", width = 15)
+	@ApiModelProperty(value = "支出情况")
+	private java.lang.String cost;
 	/**协议项目分类*/
 	@Excel(name = "协议项目分类", width = 15, dictTable = "protocol_class", dicText = "name", dicCode = "id")
     @Dict(dictTable = "protocol_class", dicText = "name", dicCode = "id")
