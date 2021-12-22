@@ -108,4 +108,9 @@ public class DonationItem implements Serializable {
 
     @ApiModelProperty(value = "项目文件")
     private java.lang.String file;
+    /**结束时间*/
+    @JsonFormat(timezone = "GMT+8",pattern = "yyyy-MM-dd HH:mm:ss")
+    @DateTimeFormat(pattern="yyyy-MM-dd HH:mm:ss")
+    @ApiModelProperty(value = "更新日期")
+    private java.util.Date endTime;
 }
