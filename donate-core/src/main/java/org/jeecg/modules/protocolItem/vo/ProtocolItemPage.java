@@ -83,15 +83,6 @@ public class ProtocolItemPage {
 	@Excel(name = "删除状态", width = 15)
 	@ApiModelProperty(value = "删除状态")
     private java.lang.Integer delFlag;
-	/**项目状态*/
-	@Excel(name = "项目状态", width = 15)
-	@ApiModelProperty(value = "项目状态")
-    private java.lang.Integer status;
-	/**项目类别*/
-	@Excel(name = "项目类别", width = 15, dicCode = "donation_category")
-    @Dict(dicCode = "donation_category")
-	@ApiModelProperty(value = "项目类别")
-    private java.lang.Integer category;
 	/**上传附件*/
 	@Excel(name = "上传附件", width = 15)
 	@ApiModelProperty(value = "上传附件")
@@ -111,6 +102,12 @@ public class ProtocolItemPage {
     @DateTimeFormat(pattern="yyyy-MM-dd HH:mm:ss")
 	@ApiModelProperty(value = "项目到账时间")
     private java.util.Date getTime;
+	/**更新日期*/
+	@Excel(name = "项目结束时间", width = 20, format = "yyyy-MM-dd HH:mm:ss")
+	@JsonFormat(timezone = "GMT+8",pattern = "yyyy-MM-dd HH:mm:ss")
+	@DateTimeFormat(pattern="yyyy-MM-dd HH:mm:ss")
+	@ApiModelProperty(value = "结束时间")
+	private java.util.Date endTime;
 
 	@ExcelCollection(name="协议选项表")
 	@ApiModelProperty(value = "协议选项表")

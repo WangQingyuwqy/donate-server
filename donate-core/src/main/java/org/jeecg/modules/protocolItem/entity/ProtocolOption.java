@@ -58,5 +58,5 @@ public class ProtocolOption implements Serializable {
     private java.lang.String money;
 	/**项目id*/
     @ApiModelProperty(value = "项目id")
-    private java.lang.String protolcolItemId;
+    private java.lang.String protocolItemId;
 }

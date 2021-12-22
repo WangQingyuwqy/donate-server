@@ -3,14 +3,14 @@
 <mapper namespace="org.jeecg.modules.protocolItem.mapper.ProtocolOptionMapper">
 
 	<delete id="deleteByMainId" parameterType="java.lang.String">
-		DELETE 
-		FROM  protocol_option 
-		WHERE
-			 protolcol_item_id = #{mainId} 	</delete>
-	
-	<select id="selectByMainId" parameterType="java.lang.String" resultType="org.jeecg.modules.protocolItem.entity.ProtocolOption">
-		SELECT * 
+		DELETE
 		FROM  protocol_option
 		WHERE
-			 protolcol_item_id = #{mainId} 	</select>
+			 protocol_item_id = #{mainId} 	</delete>
+
+	<select id="selectByMainId" parameterType="java.lang.String" resultType="org.jeecg.modules.protocolItem.entity.ProtocolOption">
+		SELECT *
+		FROM  protocol_option
+		WHERE
+			 protocol_item_id = #{mainId} 	</select>
 </mapper>

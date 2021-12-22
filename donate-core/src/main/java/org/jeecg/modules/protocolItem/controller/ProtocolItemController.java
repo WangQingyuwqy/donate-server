@@ -111,7 +111,7 @@ public class ProtocolItemController {
 		log.info("recordId is"+recordId);
 		List<String> roleName = sysBaseAPI.getRolesByUsername(sysUser.getUsername());
 		log.info("这里"+String.valueOf(roleName));
-		if(roleName.contains("schoolmate_admin")){
+		/*if(roleName.contains("schoolmate_admin")){
 			log.info("这里hahaha");
 			protocolItem.setStatus(1);
 			protocolItem.setCategory(1);
@@ -119,7 +119,7 @@ public class ProtocolItemController {
 		else{
 			protocolItem.setStatus(1);
 			protocolItem.setCategory(2);
-		}
+		}*/
 
 		protocolItemService.updateById(protocolItem);
 
