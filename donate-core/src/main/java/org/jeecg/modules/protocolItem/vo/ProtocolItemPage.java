@@ -54,6 +54,10 @@ public class ProtocolItemPage {
 	@Excel(name = "项目图片", width = 15)
 	@ApiModelProperty(value = "项目图片")
     private java.lang.String picture;
+	/**项目简介*/
+	@Excel(name = "项目简介", width = 15)
+	@ApiModelProperty(value = "项目简介")
+	private java.lang.String itemDesc;
 	/**项目详情*/
 	@Excel(name = "项目详情", width = 15)
 	@ApiModelProperty(value = "项目详情")
@@ -66,6 +70,10 @@ public class ProtocolItemPage {
 	@Excel(name = "常见问题", width = 15)
 	@ApiModelProperty(value = "常见问题")
     private java.lang.String question;
+	/**支出情况*/
+	@Excel(name = "支出情况", width = 15)
+	@ApiModelProperty(value = "支出情况")
+	private java.lang.String cost;
 	/**协议项目分类*/
 	@Excel(name = "协议项目分类", width = 15, dictTable = "protocol_class", dicText = "name", dicCode = "id")
     @Dict(dictTable = "protocol_class", dicText = "name", dicCode = "id")
@@ -75,15 +83,6 @@ public class ProtocolItemPage {
 	@Excel(name = "删除状态", width = 15)
 	@ApiModelProperty(value = "删除状态")
     private java.lang.Integer delFlag;
-	/**项目状态*/
-	@Excel(name = "项目状态", width = 15)
-	@ApiModelProperty(value = "项目状态")
-    private java.lang.Integer status;
-	/**项目类别*/
-	@Excel(name = "项目类别", width = 15, dicCode = "donation_category")
-    @Dict(dicCode = "donation_category")
-	@ApiModelProperty(value = "项目类别")
-    private java.lang.Integer category;
 	/**上传附件*/
 	@Excel(name = "上传附件", width = 15)
 	@ApiModelProperty(value = "上传附件")
@@ -103,6 +102,12 @@ public class ProtocolItemPage {
     @DateTimeFormat(pattern="yyyy-MM-dd HH:mm:ss")
 	@ApiModelProperty(value = "项目到账时间")
     private java.util.Date getTime;
+	/**更新日期*/
+	@Excel(name = "项目结束时间", width = 20, format = "yyyy-MM-dd HH:mm:ss")
+	@JsonFormat(timezone = "GMT+8",pattern = "yyyy-MM-dd HH:mm:ss")
+	@DateTimeFormat(pattern="yyyy-MM-dd HH:mm:ss")
+	@ApiModelProperty(value = "结束时间")
+	private java.util.Date endTime;
 
 	@ExcelCollection(name="协议选项表")
 	@ApiModelProperty(value = "协议选项表")

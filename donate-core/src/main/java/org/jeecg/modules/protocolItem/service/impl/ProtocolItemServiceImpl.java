@@ -26,7 +26,7 @@ public class ProtocolItemServiceImpl extends ServiceImpl<ProtocolItemMapper, Pro
 	private ProtocolItemMapper protocolItemMapper;
 	@Autowired
 	private ProtocolOptionMapper protocolOptionMapper;
-	
+
 	@Override
 	@Transactional
 	public void saveMain(ProtocolItem protocolItem, List<ProtocolOption> protocolOptionList) {
@@ -34,7 +34,7 @@ public class ProtocolItemServiceImpl extends ServiceImpl<ProtocolItemMapper, Pro
 		if(protocolOptionList!=null && protocolOptionList.size()>0) {
 			for(ProtocolOption entity:protocolOptionList) {
 				//外键设置
-				entity.setProtolcolItemId(protocolItem.getId());
+				entity.setProtocolItemId(protocolItem.getId());
 				protocolOptionMapper.insert(entity);
 			}
 		}
@@ -44,15 +44,15 @@ public class ProtocolItemServiceImpl extends ServiceImpl<ProtocolItemMapper, Pro
 	@Transactional
 	public void updateMain(ProtocolItem protocolItem,List<ProtocolOption> protocolOptionList) {
 		protocolItemMapper.updateById(protocolItem);
-		
+
 		//1.先删除子表数据
 		protocolOptionMapper.deleteByMainId(protocolItem.getId());
-		
+
 		//2.子表数据重新插入
 		if(protocolOptionList!=null && protocolOptionList.size()>0) {
 			for(ProtocolOption entity:protocolOptionList) {
 				//外键设置
-				entity.setProtolcolItemId(protocolItem.getId());
+				entity.setProtocolItemId(protocolItem.getId());
 				protocolOptionMapper.insert(entity);
 			}
 		}
@@ -73,5 +73,5 @@ public class ProtocolItemServiceImpl extends ServiceImpl<ProtocolItemMapper, Pro
 			protocolItemMapper.deleteById(id);
 		}
 	}
-	
+
 }
