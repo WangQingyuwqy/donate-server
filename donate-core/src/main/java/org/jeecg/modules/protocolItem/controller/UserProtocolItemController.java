@@ -103,33 +103,6 @@ public class UserProtocolItemController {
         return Result.OK("编辑成功!");
     }
 
-    /**
-     *   通过id删除
-     *
-     * @param id
-     * @return
-     */
-    @AutoLog(value = "协议项目-通过id删除")
-    @ApiOperation(value="协议项目-通过id删除", notes="协议项目-通过id删除")
-    @DeleteMapping(value = "/delete")
-    public Result<?> delete(@RequestParam(name="id",required=true) String id) {
-        protocolItemService.delMain(id);
-        return Result.OK("删除成功!");
-    }
-
-    /**
-     *  批量删除
-     *
-     * @param ids
-     * @return
-     */
-    @AutoLog(value = "协议项目-批量删除")
-    @ApiOperation(value="协议项目-批量删除", notes="协议项目-批量删除")
-    @DeleteMapping(value = "/deleteBatch")
-    public Result<?> deleteBatch(@RequestParam(name="ids",required=true) String ids) {
-        this.protocolItemService.delBatchMain(Arrays.asList(ids.split(",")));
-        return Result.OK("批量删除成功！");
-    }
 
     /**
      * 通过id查询
@@ -178,86 +151,5 @@ public class UserProtocolItemController {
         return Result.OK(protocolOptionList);
     }
 
-    /**
-     * 导出excel
-     *
-     * @param request
-     * @param protocolItem
-     */
-    @RequestMapping(value = "/exportXls")
-    public ModelAndView exportXls(HttpServletRequest request, ProtocolItem protocolItem) {
-        // Step.1 组装查询条件查询数据
-        QueryWrapper<ProtocolItem> queryWrapper = QueryGenerator.initQueryWrapper(protocolItem, request.getParameterMap());
-        LoginUser sysUser = (LoginUser) SecurityUtils.getSubject().getPrincipal();
-
-        //Step.2 获取导出数据
-        List<ProtocolItem> queryList = protocolItemService.list(queryWrapper);
-        // 过滤选中数据
-        String selections = request.getParameter("selections");
-        List<ProtocolItem> protocolItemList = new ArrayList<ProtocolItem>();
-        if(oConvertUtils.isEmpty(selections)) {
-            protocolItemList = queryList;
-        }else {
-            List<String> selectionList = Arrays.asList(selections.split(","));
-            protocolItemList = queryList.stream().filter(item -> selectionList.contains(item.getId())).collect(Collectors.toList());
-        }
-
-        // Step.3 组装pageList
-        List<ProtocolItemPage> pageList = new ArrayList<ProtocolItemPage>();
-        for (ProtocolItem main : protocolItemList) {
-            ProtocolItemPage vo = new ProtocolItemPage();
-            BeanUtils.copyProperties(main, vo);
-            List<ProtocolOption> protocolOptionList = protocolOptionService.selectByMainId(main.getId());
-            vo.setProtocolOptionList(protocolOptionList);
-            pageList.add(vo);
-        }
-
-        // Step.4 AutoPoi 导出Excel
-        ModelAndView mv = new ModelAndView(new JeecgEntityExcelView());
-        mv.addObject(NormalExcelConstants.FILE_NAME, "协议项目列表");
-        mv.addObject(NormalExcelConstants.CLASS, ProtocolItemPage.class);
-        mv.addObject(NormalExcelConstants.PARAMS, new ExportParams("协议项目数据", "导出人:"+sysUser.getRealname(), "协议项目"));
-        mv.addObject(NormalExcelConstants.DATA_LIST, pageList);
-        return mv;
-    }
-
-    /**
-     * 通过excel导入数据
-     *
-     * @param request
-     * @param response
-     * @return
-     */
-    @RequestMapping(value = "/importExcel", method = RequestMethod.POST)
-    public Result<?> importExcel(HttpServletRequest request, HttpServletResponse response) {
-        MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
-        Map<String, MultipartFile> fileMap = multipartRequest.getFileMap();
-        for (Map.Entry<String, MultipartFile> entity : fileMap.entrySet()) {
-            MultipartFile file = entity.getValue();// 获取上传文件对象
-            ImportParams params = new ImportParams();
-            params.setTitleRows(2);
-            params.setHeadRows(1);
-            params.setNeedSave(true);
-            try {
-                List<ProtocolItemPage> list = ExcelImportUtil.importExcel(file.getInputStream(), ProtocolItemPage.class, params);
-                for (ProtocolItemPage page : list) {
-                    ProtocolItem po = new ProtocolItem();
-                    BeanUtils.copyProperties(page, po);
-                    protocolItemService.saveMain(po, page.getProtocolOptionList());
-                }
-                return Result.OK("文件导入成功！数据行数:" + list.size());
-            } catch (Exception e) {
-                log.error(e.getMessage(),e);
-                return Result.error("文件导入失败:"+e.getMessage());
-            } finally {
-                try {
-                    file.getInputStream().close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-        return Result.OK("文件导入失败！");
-    }
 
 }
