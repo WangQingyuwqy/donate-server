@@ -84,6 +84,7 @@ public class UserDonationItemController {
                                    @RequestParam(name="pageSize", defaultValue="12") Integer pageSize,
                                    HttpServletRequest req) {
         QueryWrapper<DonationItem> queryWrapper = QueryGenerator.initQueryWrapper(donationItem, req.getParameterMap());
+        queryWrapper.eq("status",1);
         Page<DonationItem> page = new Page<DonationItem>(pageNo, pageSize);
         IPage<DonationItem> pageList = donationItemService.page(page, queryWrapper);
         return Result.OK(pageList);
@@ -145,34 +146,6 @@ public class UserDonationItemController {
     }
 
     /**
-     *   通过id删除
-     *
-     * @param id
-     * @return
-     */
-    @AutoLog(value = "捐赠项目-通过id删除")
-    @ApiOperation(value="捐赠项目-通过id删除", notes="捐赠项目-通过id删除")
-    @DeleteMapping(value = "/delete")
-    public Result<?> delete(@RequestParam(name="id",required=true) String id) {
-        donationItemService.delMain(id);
-        return Result.OK("删除成功!");
-    }
-
-    /**
-     *  批量删除
-     *
-     * @param ids
-     * @return
-     */
-    @AutoLog(value = "捐赠项目-批量删除")
-    @ApiOperation(value="捐赠项目-批量删除", notes="捐赠项目-批量删除")
-    @DeleteMapping(value = "/deleteBatch")
-    public Result<?> deleteBatch(@RequestParam(name="ids",required=true) String ids) {
-        this.donationItemService.delBatchMain(Arrays.asList(ids.split(",")));
-        return Result.OK("批量删除成功！");
-    }
-
-    /**
      * 通过id查询
      *
      * @param id
@@ -205,7 +178,7 @@ public class UserDonationItemController {
     }
 
     /**
-     * 通过id查询
+     * 通过id查询捐赠选项
      *
      * @param id
      * @return
@@ -217,87 +190,4 @@ public class UserDonationItemController {
         List<DonationOption> donationOptionList = donationOptionService.selectByMainId(id);
         return Result.OK(donationOptionList);
     }
-
-    /**
-     * 导出excel
-     *
-     * @param request
-     * @param donationItem
-     */
-    @RequestMapping(value = "/exportXls")
-    public ModelAndView exportXls(HttpServletRequest request, DonationItem donationItem) {
-        // Step.1 组装查询条件查询数据
-        QueryWrapper<DonationItem> queryWrapper = QueryGenerator.initQueryWrapper(donationItem, request.getParameterMap());
-        LoginUser sysUser = (LoginUser) SecurityUtils.getSubject().getPrincipal();
-
-        //Step.2 获取导出数据
-        List<DonationItem> queryList = donationItemService.list(queryWrapper);
-        // 过滤选中数据
-        String selections = request.getParameter("selections");
-        List<DonationItem> donationItemList = new ArrayList<DonationItem>();
-        if(oConvertUtils.isEmpty(selections)) {
-            donationItemList = queryList;
-        }else {
-            List<String> selectionList = Arrays.asList(selections.split(","));
-            donationItemList = queryList.stream().filter(item -> selectionList.contains(item.getId())).collect(Collectors.toList());
-        }
-
-        // Step.3 组装pageList
-        List<DonationItemPage> pageList = new ArrayList<DonationItemPage>();
-        for (DonationItem main : donationItemList) {
-            DonationItemPage vo = new DonationItemPage();
-            BeanUtils.copyProperties(main, vo);
-            List<DonationOption> donationOptionList = donationOptionService.selectByMainId(main.getId());
-            vo.setDonationOptionList(donationOptionList);
-            pageList.add(vo);
-        }
-
-        // Step.4 AutoPoi 导出Excel
-        ModelAndView mv = new ModelAndView(new JeecgEntityExcelView());
-        mv.addObject(NormalExcelConstants.FILE_NAME, "捐赠项目列表");
-        mv.addObject(NormalExcelConstants.CLASS, DonationItemPage.class);
-        mv.addObject(NormalExcelConstants.PARAMS, new ExportParams("捐赠项目数据", "导出人:"+sysUser.getRealname(), "捐赠项目"));
-        mv.addObject(NormalExcelConstants.DATA_LIST, pageList);
-        return mv;
-    }
-
-    /**
-     * 通过excel导入数据
-     *
-     * @param request
-     * @param response
-     * @return
-     */
-    @RequestMapping(value = "/importExcel", method = RequestMethod.POST)
-    public Result<?> importExcel(HttpServletRequest request, HttpServletResponse response) {
-        MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
-        Map<String, MultipartFile> fileMap = multipartRequest.getFileMap();
-        for (Map.Entry<String, MultipartFile> entity : fileMap.entrySet()) {
-            MultipartFile file = entity.getValue();// 获取上传文件对象
-            ImportParams params = new ImportParams();
-            params.setTitleRows(2);
-            params.setHeadRows(1);
-            params.setNeedSave(true);
-            try {
-                List<DonationItemPage> list = ExcelImportUtil.importExcel(file.getInputStream(), DonationItemPage.class, params);
-                for (DonationItemPage page : list) {
-                    DonationItem po = new DonationItem();
-                    BeanUtils.copyProperties(page, po);
-                    donationItemService.saveMain(po, page.getDonationOptionList());
-                }
-                return Result.OK("文件导入成功！数据行数:" + list.size());
-            } catch (Exception e) {
-                log.error(e.getMessage(),e);
-                return Result.error("文件导入失败:"+e.getMessage());
-            } finally {
-                try {
-                    file.getInputStream().close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-        return Result.OK("文件导入失败！");
-    }
-
 }
